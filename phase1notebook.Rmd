@@ -1,0 +1,99 @@
+---
+title: "Phase1"
+output: html_notebook
+---
+
+Installing the packages
+
+
+```{r}
+install.packages("scatterplot3d") 
+install.packages("dplyr")
+install.packages("ggplot2")
+```
+
+Reading libraries and the dataset
+
+```{r}
+library(ggplot2)
+library(scatterplot3d)
+library(dplyr)
+library(readr)
+dataset <- read_csv("Dataset/students_adaptability_level_online_education.csv")
+```
+
+Sample of raw dataset and summary 
+```{r}
+View(dataset)
+summary(dataset)
+```
+ Missing values
+```{r}
+sum(is.na(dataset))
+```
+Since there are no missing values, and since there are no numerical data to be checked for outliers, we will move to the next step
+
+Data summary
+```{r}
+summary(dataset$Age)
+summary(dataset$Gender)
+summary(dataset$Device)
+summary(dataset$Location)
+summary(dataset$'Self Lms')
+summary(dataset$'IT Student')
+summary(dataset$'Network Type')
+summary(dataset$'Internet Type')
+summary(dataset$'Load-shedding')
+summary(dataset$'Class Duration')
+summary(dataset$'Education Level')
+summary(dataset$'Adaptivity Level')
+summary(dataset$'Institution Type')
+summary(dataset$'Financial Condition')
+```
+All attribute types are char, so we can't calculate variance or discretize.
+
+
+Converting data types from char to factors so they can be plotted
+```{r}
+dataset$'Financial Condition' <- as.factor(dataset$'Financial Condition')
+dataset$'Institution Type' <- as.factor(dataset$'Institution Type')
+dataset$'Education Level' <- as.factor(dataset$'Education Level')
+dataset$'Load-shedding' <- as.factor(dataset$'Load-shedding')
+dataset$'Internet Type'<- as.factor(dataset$'Internet Type')
+dataset$'Network Type'<- as.factor(dataset$'Network Type')
+dataset$Device <- as.factor(dataset$Device)
+dataset$Gender<- as.factor(dataset$Gender)
+dataset$Age <- as.factor(dataset$Age)
+```
+
+Plotting Methods:
+
+Bar plot of the age attribute, which is a range
+```{r}
+ggplot(dataset, aes(x = Age)) + geom_bar()
+```
+
+Mosaic plot of the educational level attribute with the financial condition
+```{r}
+counts <- table(dataset$'Education Level', dataset$'Financial Condition')
+mosaicplot(counts, xlab='Education Level', ylab='Financial Condition',
+           main='Education Level by Financial Condition', col='forestgreen')
+```
+
+Scatter plots of the gender and device and class duration attributes
+and internet type and load-shedding and institution type attributes
+```{r}
+scatterplot3d(dataset$Gender,dataset$Device, dataset$`Class Duration`)
+scatterplot3d(dataset$'Internet Type',dataset$'Load-shedding', dataset$'Institution Type')
+```
+
+
+Pie chart for the adaptivity level attribute
+```{r}
+tab <- dataset$'Adaptivity Level'%>% table()
+precentages <- tab %>% prop.table() %>% round(3) * 100 
+txt <- paste0(names(tab), '\n', precentages, '%') 
+pie(tab, labels=txt) 
+```
+
+Since this dataset does not contain numerical values, discreization and normalization cannot be performed.
