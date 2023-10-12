@@ -94,3 +94,11 @@ datasetEncoded$'Adaptivity Level'= factor(datasetEncoded$'Adaptivity Level', c("
 datasetEncoded$'Financial Condition'= factor(datasetEncoded$'Financial Condition', c("Poor","Mid","Rich"),c(0,1,2))
 datasetEncoded$'Institution Type'= factor(datasetEncoded$'Institution Type', c("Non Government","Government"),c(0,1))
 datasetEncoded$'Education Level'= factor(datasetEncoded$'Education Level', c("School","College","University"),c(0,1,2))
+
+
+# Sample of encoded dataset and summary
+View(datasetEncoded)
+summary(datasetEncoded)
+
+# Chi Square
+chisq.test(datasetEncoded$'Institution Type', datasetEncoded$'Financial Condition')
