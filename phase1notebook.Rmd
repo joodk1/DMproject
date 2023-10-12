@@ -5,11 +5,12 @@ output: html_notebook
 
 Installing the packages
 
-
 ```{r}
-install.packages("scatterplot3d") 
 install.packages("dplyr")
+install.packages("farver")
 install.packages("ggplot2")
+install.packages("colorspace")
+install.packages("scatterplot3d") 
 ```
 
 Reading libraries and the dataset
@@ -22,18 +23,31 @@ library(readr)
 dataset <- read_csv("Dataset/students_adaptability_level_online_education.csv")
 ```
 
-Sample of raw dataset and summary 
+Sample of raw dataset and summary
+
 ```{r}
 View(dataset)
 summary(dataset)
 ```
- Missing values
+
+Missing values
+
 ```{r}
 sum(is.na(dataset))
 ```
+
 Since there are no missing values, and since there are no numerical data to be checked for outliers, we will move to the next step
 
+Number of rows
+
+```{r}
+
+```
+
+Numer of columns
+
 Data summary
+
 ```{r}
 summary(dataset$Age)
 summary(dataset$Gender)
@@ -50,10 +64,11 @@ summary(dataset$'Adaptivity Level')
 summary(dataset$'Institution Type')
 summary(dataset$'Financial Condition')
 ```
+
 All attribute types are char, so we can't calculate variance or discretize.
 
-
 Converting data types from char to factors so they can be plotted
+
 ```{r}
 dataset$'Financial Condition' <- as.factor(dataset$'Financial Condition')
 dataset$'Institution Type' <- as.factor(dataset$'Institution Type')
@@ -61,6 +76,7 @@ dataset$'Education Level' <- as.factor(dataset$'Education Level')
 dataset$'Load-shedding' <- as.factor(dataset$'Load-shedding')
 dataset$'Internet Type'<- as.factor(dataset$'Internet Type')
 dataset$'Network Type'<- as.factor(dataset$'Network Type')
+dataset$'IT Student'<- as.factor(dataset$'IT Student')
 dataset$Device <- as.factor(dataset$Device)
 dataset$Gender<- as.factor(dataset$Gender)
 dataset$Age <- as.factor(dataset$Age)
@@ -68,27 +84,57 @@ dataset$Age <- as.factor(dataset$Age)
 
 Plotting Methods:
 
-Bar plot of the age attribute, which is a range
+Bar plot of the age attribute:
+
 ```{r}
 ggplot(dataset, aes(x = Age)) + geom_bar()
 ```
 
+Graph decsription: this graph shows us the number of students whose data been collected based on their age range, we noticed they are mostly betwen the ages of 21-25 and 11-15.
+
 Mosaic plot of the educational level attribute with the financial condition
+
 ```{r}
 counts <- table(dataset$'Education Level', dataset$'Financial Condition')
 mosaicplot(counts, xlab='Education Level', ylab='Financial Condition',
            main='Education Level by Financial Condition', col='forestgreen')
 ```
 
-Scatter plots of the gender and device and class duration attributes
-and internet type and load-shedding and institution type attributes
+Graph description: this graph shows us a visual comparison between students' financial condition against there education level, we noticed that in each education level category, students mostly come from a middle-class family regarding their financial condition.
+
+Scatter plots of the gender and device and class duration attributes and internet type and load-shedding and institution type attributes
+
 ```{r}
-scatterplot3d(dataset$Gender,dataset$Device, dataset$`Class Duration`)
+scatterplot3d(dataset$Gender,dataset$Device, dataset$'Class Duration')
 scatterplot3d(dataset$'Internet Type',dataset$'Load-shedding', dataset$'Institution Type')
 ```
 
+Graph description - scatter plot 1: scatter plot showing the relation between the gender, most used device, and hours of attended class per day Graph description - scatter plot 2: scatter plot showing the relation between the institution type, most used internet type by students, and level of load-shedding.
+
+Pie chart for the self-LMS attribute
+
+```{r}
+tab <- dataset$'Self Lms'%>% table()
+precentages <- tab %>% prop.table() %>% round(2) * 100 
+txt <- paste0(names(tab), '\n', precentages, '%') 
+pie(tab, labels=txt) 
+```
+
+Graph description: a pie chart of the self-LMS attribute that shows us the percentage of institutions that has their own LMS, we notice that most of them, by a 83% percentage, do not have their own.
+
+Pie chart for the IT student attribute:
+
+```{r}
+tab <- dataset$'IT Student'%>% table()
+precentages <- tab %>% prop.table() %>% round(2) * 100 
+txt <- paste0(names(tab), '\n', precentages, '%') 
+pie(tab, labels=txt) 
+```
+
+Graph description: a pie chart of the IT student attribute that shows us the percentage of students who are studying IT, we notice that most of them, by a 75% percentage, are not.
 
 Pie chart for the adaptivity level attribute
+
 ```{r}
 tab <- dataset$'Adaptivity Level'%>% table()
 precentages <- tab %>% prop.table() %>% round(3) * 100 
@@ -96,4 +142,26 @@ txt <- paste0(names(tab), '\n', precentages, '%')
 pie(tab, labels=txt) 
 ```
 
-Since this dataset does not contain numerical values, discreization and normalization cannot be performed.
+Graph description: a pie chart of the adaptivity level attribute that shows us the percentages of students adaptivity level in online education, which is our class label, we notice that most of them, by a 51.9% percentage, have a moderate adaptivity level, 39.8% have a low adaptivity level, and only 8.3% have a high adaptivit level.
+
+Since this dataset only contains categorical data, discreization and normalization cannot be performed.
+
+Encoding categorical variables
+
+```{r}
+datasetEncoded<-dataset
+datasetEncoded$Gender= factor(datasetEncoded$Gender, c("Boy","Girl"),c(0,1))
+datasetEncoded$Location= factor(datasetEncoded$Location, c("No","Yes"),c(0,1))
+datasetEncoded$'Self Lms'= factor(datasetEncoded$'Self Lms', c("No","Yes"),c(0,1))
+datasetEncoded$'IT Student'= factor(datasetEncoded$'IT Student', c("No","Yes"),c(0,1))
+datasetEncoded$Device= factor(datasetEncoded$Device, c("Mobile","Computer","Tab"),c(0,1,2))
+datasetEncoded$'Load-shedding'= factor(datasetEncoded$'Load-shedding', c("Low","High"),c(0,1))
+datasetEncoded$'Network Type'= factor(datasetEncoded$'Network Type', c("2G","3G","4G"),c(0,1,2))
+datasetEncoded$'Class Duration'= factor(datasetEncoded$'Class Duration', c("0","1-3","3-6"),c(0,1,2))
+datasetEncoded$'Internet Type'= factor(datasetEncoded$'Internet Type', c("Wifi","Mobile Data"),c(0,1))
+datasetEncoded$Age= factor(datasetEncoded$Age, c("1-5","6-10","11-15","16-20","21-25","26-30"),c(0,1,2,3,4,5))
+datasetEncoded$'Adaptivity Level'= factor(datasetEncoded$'Adaptivity Level', c("Low","Moderate","High"),c(0,1,2))
+datasetEncoded$'Financial Condition'= factor(datasetEncoded$'Financial Condition', c("Poor","Mid","Rich"),c(0,1,2))
+datasetEncoded$'Institution Type'= factor(datasetEncoded$'Institution Type', c("Non Government","Government"),c(0,1))
+datasetEncoded$'Education Level'= factor(datasetEncoded$'Education Level', c("School","College","University"),c(0,1,2))
+```
