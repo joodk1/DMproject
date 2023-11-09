@@ -5,6 +5,8 @@ output: html_notebook
 
 # Student's Adaptability Level in Online Education
 
+`***`
+
 ## The Goal of Collecting this Dataset:
 
 The goal of our project is to build a model that can predict the adaptivity level of a student with a high degree of accuracy. We will be using classification and clustering to achieve this goal.
@@ -38,6 +40,8 @@ The class label is "Adaptivity Level".
 |       Device        |    Nominal     |        Student's most used device in class        |         Computer, Tab, Mobile         |
 |  Adaptivity Level   |    Ordinal     | Student's adaptibility level to online education  |          High, Moderate, Low          |
 
+`***`
+
 ## Data Summarization and Preprocessing:
 
 #### Installing the packages
@@ -50,6 +54,8 @@ install.packages("colorspace")
 install.packages("scatterplot3d") 
 ```
 
+`***`
+
 #### Reading libraries and the dataset
 
 ```{r}
@@ -60,12 +66,16 @@ library(readr)
 dataset <- read_csv("Dataset/students_adaptability_level_online_education.csv")
 ```
 
+`***`
+
 #### Sample of raw dataset and summary
 
 ```{r}
 View(dataset)
 summary(dataset)
 ```
+
+`***`
 
 #### Missing values
 
@@ -74,6 +84,8 @@ sum(is.na(dataset))
 ```
 
 Since there are no missing values, and since there are no numerical data to be checked for outliers, we will move to the next step
+
+`***`
 
 #### Data summary
 
@@ -96,6 +108,8 @@ summary(dataset$'Financial Condition')
 
 All attribute types are char, so we can't calculate variance or discretize.
 
+`***`
+
 #### Converting data types from char to factors so they can be plotted
 
 ```{r}
@@ -111,6 +125,8 @@ dataset$Gender<- as.factor(dataset$Gender)
 dataset$Age <- as.factor(dataset$Age)
 ```
 
+`***`
+
 ### Plotting Methods:
 
 #### Bar plot of the age attribute:
@@ -121,6 +137,8 @@ ggplot(dataset, aes(x = Age)) + geom_bar()
 
 Graph decsription: this graph shows us the number of students whose data been collected based on their age range, we noticed they are mostly betwen the ages of 21-25 and 11-15.
 
+`***`
+
 #### Mosaic plot of the educational level attribute with the financial condition
 
 ```{r}
@@ -130,6 +148,8 @@ mosaicplot(counts, xlab='Education Level', ylab='Financial Condition',
 ```
 
 Graph description: this graph shows us a visual comparison between students' financial condition against there education level, we noticed that in each education level category, students mostly come from a middle-class family regarding their financial condition.
+
+`***`
 
 #### Scatter plots of the gender and device and class duration attributes and internet type and load-shedding and institution type attributes
 
@@ -142,6 +162,8 @@ Graph description - scatter plot 1: scatter plot showing the relation between th
 
 Graph description - scatter plot 2: scatter plot showing the relation between the institution type, most used internet type by students, and level of load-shedding.
 
+`***`
+
 #### Pie chart for the self-LMS attribute
 
 ```{r}
@@ -152,6 +174,8 @@ pie(tab, labels=txt)
 ```
 
 Graph description: a pie chart of the self-LMS attribute that shows us the percentage of institutions that has their own LMS, we notice that most of them, by a 83% percentage, do not have their own.
+
+`***`
 
 #### Pie chart for the IT student attribute:
 
@@ -164,6 +188,8 @@ pie(tab, labels=txt)
 
 Graph description: a pie chart of the IT student attribute that shows us the percentage of students who are studying IT, we notice that most of them, by a 75% percentage, are not.
 
+`***`
+
 #### Pie chart for the adaptivity level attribute
 
 ```{r}
@@ -173,9 +199,13 @@ txt <- paste0(names(tab), '\n', precentages, '%')
 pie(tab, labels=txt) 
 ```
 
-Graph description: a pie chart of the adaptivity level attribute that shows us the percentages of students adaptivity level in online education, which is our class label, we notice that most of them, by a 51.9% percentage, have a moderate adaptivity level, 39.8% have a low adaptivity level, and only 8.3% have a high adaptivit level.
+Graph description: a pie chart of the adaptivity level attribute that shows us the percentages of students adaptivity level in online education, which is our class label, we notice that most of them, by a 51.9% percentage, have a moderate adaptivity level, 39.8% have a low adaptivity level, and only 8.3% have a high adaptivity level.
+
+`***`
 
 Since this dataset only contains categorical data, discreization and normalization cannot be performed.
+
+`***`
 
 #### Encoding categorical variables
 
@@ -197,12 +227,16 @@ datasetEncoded$'Institution Type'= factor(datasetEncoded$'Institution Type', c("
 datasetEncoded$'Education Level'= factor(datasetEncoded$'Education Level', c("School","College","University"),c(0,1,2))
 ```
 
+`***`
+
 #### Sample of encoded dataset and summary
 
 ```{r}
 View(datasetEncoded)
 summary(datasetEncoded)
 ```
+
+`***`
 
 #### Chi Square
 
@@ -212,5 +246,7 @@ chisq.test(datasetEncoded$'Institution Type', datasetEncoded$'Financial Conditio
 ```
 
 since the p value is not above 0.05 and therefore, the institution type depends on the financial condition.
+
+`***`
 
 ##  Data Mining:
