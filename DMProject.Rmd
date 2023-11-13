@@ -5,7 +5,7 @@ output: html_notebook
 
 # Student's Adaptability Level in Online Education
 
-`***`
+------------------------------------------------------------------------
 
 ## The Goal of Collecting this Dataset:
 
@@ -24,7 +24,7 @@ The class label is "Adaptivity Level".
 ## Our attributes are as follows:
 
 |   Attribute Name    | Attribute Type |                    Description                    |            Possible Values            |
-|:-------------------:|:--------------:|:-------------------------------------------------:|:-------------------------------------:|
+|:---------------:|:---------------:|:------------------:|:---------------:|
 |       Gender        |     Binary     |               Student's gender type               |               Girl, Boy               |
 |         Age         |    Ordinal     |                Student's age range                | 1-5, 6-10, 11-15, 16-20, 21-25, 26-30 |
 |  Educational Level  |    Nominal     |       Student's education institution level       |      School, College, University      |
@@ -40,7 +40,7 @@ The class label is "Adaptivity Level".
 |       Device        |    Nominal     |        Student's most used device in class        |         Computer, Tab, Mobile         |
 |  Adaptivity Level   |    Ordinal     | Student's adaptibility level to online education  |          High, Moderate, Low          |
 
-`***`
+------------------------------------------------------------------------
 
 ## Data Summarization and Preprocessing:
 
@@ -51,31 +51,55 @@ install.packages("dplyr")
 install.packages("farver")
 install.packages("ggplot2")
 install.packages("colorspace")
-install.packages("scatterplot3d") 
+install.packages("scatterplot3d")
+install.packages("gridExtra")
+install.packages("superml")
+install.packages('party')
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("rattle")
 ```
-
-`***`
 
 #### Reading libraries and the dataset
 
 ```{r}
-library(ggplot2)
+library(rpart)
+library(rpart.plot)
+library(rattle)
+library(rpart.plot)
+library(RColorBrewer)
 library(scatterplot3d)
+library(ggplot2)
 library(dplyr)
 library(readr)
+library(gridExtra)
+library('superml')
+library(caret)
+library(party)
+library(fpc)
+library(FSelector)
+library(cluster)
+library(factoextra)
+library('DPBBM')
+
 dataset <- read_csv("Dataset/students_adaptability_level_online_education.csv")
 ```
 
-`***`
-
-#### Sample of raw dataset and summary
+#### Sample and summary of raw dataset
 
 ```{r}
 View(dataset)
-summary(dataset)
-```
 
-`***`
+shape<-dim(dataset)
+row<-shape[1]
+col<-shape[2]
+print(paste("Number of rows are:", row))
+print(paste("Number of columns are:", col))
+
+summary(dataset)
+names(dataset)
+str(dataset)
+```
 
 #### Missing values
 
@@ -85,63 +109,42 @@ sum(is.na(dataset))
 
 Since there are no missing values, and since there are no numerical data to be checked for outliers, we will move to the next step
 
-`***`
+All attribute types are char, so we can't calculate variance or do discretization.
 
-#### Data summary
-
-```{r}
-summary(dataset$Age)
-summary(dataset$Gender)
-summary(dataset$Device)
-summary(dataset$Location)
-summary(dataset$'Self Lms')
-summary(dataset$'IT Student')
-summary(dataset$'Network Type')
-summary(dataset$'Internet Type')
-summary(dataset$'Load-shedding')
-summary(dataset$'Class Duration')
-summary(dataset$'Education Level')
-summary(dataset$'Adaptivity Level')
-summary(dataset$'Institution Type')
-summary(dataset$'Financial Condition')
-```
-
-All attribute types are char, so we can't calculate variance or discretize.
-
-`***`
-
-#### Converting data types from char to factors so they can be plotted
-
-```{r}
-dataset$'Financial Condition' <- as.factor(dataset$'Financial Condition')
-dataset$'Institution Type' <- as.factor(dataset$'Institution Type')
-dataset$'Education Level' <- as.factor(dataset$'Education Level')
-dataset$'Load-shedding' <- as.factor(dataset$'Load-shedding')
-dataset$'Internet Type'<- as.factor(dataset$'Internet Type')
-dataset$'Network Type'<- as.factor(dataset$'Network Type')
-dataset$'IT Student'<- as.factor(dataset$'IT Student')
-dataset$Device <- as.factor(dataset$Device)
-dataset$Gender<- as.factor(dataset$Gender)
-dataset$Age <- as.factor(dataset$Age)
-```
-
-`***`
+------------------------------------------------------------------------
 
 ### Plotting Methods:
 
-#### Bar plot of the age attribute:
+#### Bar plot of the gender, age, and education level attributes
 
 ```{r}
-ggplot(dataset, aes(x = Age)) + geom_bar()
+# Bar plot of the gender attribute
+ggplot(dataset, mapping = aes(x = Gender)) +
+  geom_bar(aes(fill = Gender), position = "dodge")
+
+# Bar plot of the age attribute
+ggplot(dataset, mapping = aes(x = Age)) +
+  geom_bar(aes(fill = Age), position = "dodge")
+
+# Bar plot of the education level attribute
+ggplot(dataset, mapping = aes(x = `Education Level`)) +
+  geom_bar(aes(fill = `Education Level`), position = "dodge")
 ```
 
-Graph decsription: this graph shows us the number of students whose data been collected based on their age range, we noticed they are mostly betwen the ages of 21-25 and 11-15.
+Graphs decsriptions:
 
-`***`
+Gender plot: this graph shows us that the number of students who are boys are slightly more than the girl students.
+
+Age plot: this graph shows us the number of students whose data been collected based on their age range, we noticed they are mostly between the ages of 21-25 and 11-15.
+
+Education level plot: this graph shows us that the dataset is mostly collected from school and university students, and only a small number was collected from college students.
+
+------------------------------------------------------------------------
 
 #### Mosaic plot of the educational level attribute with the financial condition
 
 ```{r}
+#Mosaic plot of the educational level attribute with the financial condition
 counts <- table(dataset$'Education Level', dataset$'Financial Condition')
 mosaicplot(counts, xlab='Education Level', ylab='Financial Condition',
            main='Education Level by Financial Condition', col='forestgreen')
@@ -149,94 +152,58 @@ mosaicplot(counts, xlab='Education Level', ylab='Financial Condition',
 
 Graph description: this graph shows us a visual comparison between students' financial condition against there education level, we noticed that in each education level category, students mostly come from a middle-class family regarding their financial condition.
 
-`***`
+------------------------------------------------------------------------
 
-#### Scatter plots of the gender and device and class duration attributes and internet type and load-shedding and institution type attributes
-
-```{r}
-scatterplot3d(dataset$Gender,dataset$Device, dataset$'Class Duration')
-scatterplot3d(dataset$'Internet Type',dataset$'Load-shedding', dataset$'Institution Type')
-```
-
-Graph description - scatter plot 1: scatter plot showing the relation between the gender, most used device, and hours of attended class per day
-
-Graph description - scatter plot 2: scatter plot showing the relation between the institution type, most used internet type by students, and level of load-shedding.
-
-`***`
-
-#### Pie chart for the self-LMS attribute
+#### Pie chart for the self-LMS, IT student, and the adaptivity level attributes
 
 ```{r}
+# Pie chart for the self-LMS attribute
 tab <- dataset$'Self Lms'%>% table()
 precentages <- tab %>% prop.table() %>% round(2) * 100 
 txt <- paste0(names(tab), '\n', precentages, '%') 
-pie(tab, labels=txt) 
-```
+pie(tab, labels=txt, main = "Distribution of self-LMS")
 
-Graph description: a pie chart of the self-LMS attribute that shows us the percentage of institutions that has their own LMS, we notice that most of them, by a 83% percentage, do not have their own.
-
-`***`
-
-#### Pie chart for the IT student attribute:
-
-```{r}
+# Pie chart for the IT student attribute
 tab <- dataset$'IT Student'%>% table()
 precentages <- tab %>% prop.table() %>% round(2) * 100 
 txt <- paste0(names(tab), '\n', precentages, '%') 
-pie(tab, labels=txt) 
+pie(tab, labels=txt, main = "Distribution of IT student")
+
+# Pie chart for the adaptivity level attribute
+tab <- dataset$'Adaptivity Level' %>% table()
+percentages <- tab %>% prop.table() %>% round(3) * 100
+txt <- paste0(names(tab), '\n', percentages, '%')
+pie(tab, labels = txt, main = "Distribution of Adaptivity Levels")
+
 ```
 
-Graph description: a pie chart of the IT student attribute that shows us the percentage of students who are studying IT, we notice that most of them, by a 75% percentage, are not.
+Graphs descriptions:
 
-`***`
+Self-LMS chart: the graph shows us the percentage of institutions that has their own LMS, we notice that most of them, by a 83% percentage, do not have their own.
 
-#### Pie chart for the adaptivity level attribute
+IT-Student chart: the graph shows us the percentage of students who are studying IT, we notice that most of them, by a 75% percentage, are not.
 
-```{r}
-tab <- dataset$'Adaptivity Level'%>% table()
-precentages <- tab %>% prop.table() %>% round(3) * 100 
-txt <- paste0(names(tab), '\n', precentages, '%') 
-pie(tab, labels=txt) 
-```
+Adaptivity level chart: the graphs shows us the percentages of students adaptivity level in online education, which is our class label, we notice that most of them, by a 51.9% percentage, have a moderate adaptivity level, 39.8% have a low adaptivity level, and only 8.3% have a high adaptivity level.
 
-Graph description: a pie chart of the adaptivity level attribute that shows us the percentages of students adaptivity level in online education, which is our class label, we notice that most of them, by a 51.9% percentage, have a moderate adaptivity level, 39.8% have a low adaptivity level, and only 8.3% have a high adaptivity level.
-
-`***`
+------------------------------------------------------------------------
 
 Since this dataset only contains categorical data, discreization and normalization cannot be performed.
 
-`***`
+------------------------------------------------------------------------
 
 #### Encoding categorical variables
 
 ```{r}
-datasetEncoded<-dataset
-datasetEncoded$Gender= factor(datasetEncoded$Gender, c("Boy","Girl"),c(0,1))
-datasetEncoded$Location= factor(datasetEncoded$Location, c("No","Yes"),c(0,1))
-datasetEncoded$'Self Lms'= factor(datasetEncoded$'Self Lms', c("No","Yes"),c(0,1))
-datasetEncoded$'IT Student'= factor(datasetEncoded$'IT Student', c("No","Yes"),c(0,1))
-datasetEncoded$Device= factor(datasetEncoded$Device, c("Mobile","Computer","Tab"),c(0,1,2))
-datasetEncoded$'Load-shedding'= factor(datasetEncoded$'Load-shedding', c("Low","High"),c(0,1))
-datasetEncoded$'Network Type'= factor(datasetEncoded$'Network Type', c("2G","3G","4G"),c(0,1,2))
-datasetEncoded$'Class Duration'= factor(datasetEncoded$'Class Duration', c("0","1-3","3-6"),c(0,1,2))
-datasetEncoded$'Internet Type'= factor(datasetEncoded$'Internet Type', c("Wifi","Mobile Data"),c(0,1))
-datasetEncoded$Age= factor(datasetEncoded$Age, c("1-5","6-10","11-15","16-20","21-25","26-30"),c(0,1,2,3,4,5))
-datasetEncoded$'Adaptivity Level'= factor(datasetEncoded$'Adaptivity Level', c("Low","Moderate","High"),c(0,1,2))
-datasetEncoded$'Financial Condition'= factor(datasetEncoded$'Financial Condition', c("Poor","Mid","Rich"),c(0,1,2))
-datasetEncoded$'Institution Type'= factor(datasetEncoded$'Institution Type', c("Non Government","Government"),c(0,1))
-datasetEncoded$'Education Level'= factor(datasetEncoded$'Education Level', c("School","College","University"),c(0,1,2))
+# Encoding categorical attributes
+categorical_cols <- dataset %>%
+  select_if(is.character) %>%
+  names()
+categorical_cols
+# Convert categorical columns to factors
+dataset[categorical_cols] <- lapply(dataset[categorical_cols], as.factor)
 ```
 
-`***`
-
-#### Sample of encoded dataset and summary
-
-```{r}
-View(datasetEncoded)
-summary(datasetEncoded)
-```
-
-`***`
+------------------------------------------------------------------------
 
 #### Chi Square
 
@@ -245,8 +212,532 @@ chisq.test(datasetEncoded$'Institution Type', datasetEncoded$'Financial Conditio
 
 ```
 
-since the p value is not above 0.05 and therefore, the institution type depends on the financial condition.
+since the p value is less than 0.05, therefore, the institution type depends on the financial condition.
 
-`***`
+------------------------------------------------------------------------
 
-##  Data Mining:
+## Data Mining Tasks:
+
+### Classification:
+
+#### 1- 90/10 distribution:
+
+Splitting the data into training and testing tests
+
+```{r}
+set.seed(1234)
+split90 <- createDataPartition(dataset$`Adaptivity Level`, p = 0.9, list = FALSE, times = 1)
+trainData <- dataset[split90,]
+testData <- dataset[split90,]
+```
+
+Checking that both the training and testing sets have the same label proportions
+
+```{r}
+train90Prop <- trainData %>% 
+  select(`Adaptivity Level`) %>% 
+  group_by(`Adaptivity Level`) %>% 
+  summarize(n = n()) %>% 
+  mutate(pct = round(prop.table(n), 2))
+
+test90Prop <- testData %>% 
+  select(`Adaptivity Level`) %>% 
+  group_by(`Adaptivity Level`) %>% 
+  summarize(n = n()) %>% 
+  mutate(pct = round(prop.table(n), 2))
+
+train90Prop
+test90Prop
+```
+
+They are proportionate, next is building decision tress for each attribute selection measure:
+
+```{r}
+
+infoGainTree <- rpart(formula = `Adaptivity Level` ~ ., data = trainData, method = "class", parms = list(split = "information"))
+gainRatioTree <- rpart(formula = `Adaptivity Level` ~ ., data = trainData, method = "class", parms = list(split = "anova"))
+GiniIndexTree <- rpart(formula = `Adaptivity Level` ~ ., data = trainData, method = "class", parms = list(split = "gini"))
+```
+
+1.  Information Gain
+
+```{r}
+
+IG1.ctree <- ctree(infoGainTree, data = trainData)
+table(predict(IG1.ctree), trainData$`Adaptivity Level`)
+
+print(IG1.ctree)
+plot(IG1.ctree, type="simple")
+
+testPred <- predict(IG1.ctree, newdata = testData)
+result<-table(testPred, testData$`Adaptivity Level`)
+
+results <- confusionMatrix(testPred, testData$`Adaptivity Level`)
+print(results)
+```
+
+2.  Gain Ratio
+
+```{r}
+GR1.ctree <- ctree(gainRatioTree, data = trainData)
+table(predict(GR1.ctree), trainData$`Adaptivity Level`)
+
+print(GR1.ctree)
+plot(GR1.ctree, type="simple")
+
+testPred <- predict(GR1.ctree, newdata = testData)
+result<-table(testPred, testData$`Adaptivity Level`)
+
+results <- confusionMatrix(testPred, testData$`Adaptivity Level`)
+print(results)
+```
+
+Calculating evaluation metrics
+
+```{r}
+confusion_matrix <- confusionMatrix(data = testPred, reference = testData$`Adaptivity Level`)
+# Calculate evaluation metrics
+accuracy <- confusion_matrix$overall["Accuracy"]
+accuracy
+# Calculate precision
+precision <- confusion_matrix$table[2,2] / sum(confusion_matrix$table[,2])
+precision
+as.matrix(results, what = "overall")
+
+```
+
+3.  Gini Index
+
+```{r}
+GI1.ctree <- ctree(GiniIndexTree, data = trainData)
+table(predict(GI1.ctree), trainData$`Adaptivity Level`)
+
+print(GI1.ctree)
+plot(GI1.ctree, type="simple")
+
+testPred <- predict(GI1.ctree, newdata = testData)
+result<-table(testPred, testData$`Adaptivity Level`)
+
+results <- confusionMatrix(testPred, testData$`Adaptivity Level`)
+print(results)
+```
+
+#### 2- 80/20 distribution:
+
+Splitting the data into training and testing tests
+
+```{r}
+set.seed(1234)
+split80 <- createDataPartition(dataset$`Adaptivity Level`, p = 0.8, list = FALSE, times = 1)
+trainData <- dataset[split80,]
+testData <- dataset[split80,]
+```
+
+Checking that both the training and testing sets have the same label proportions
+
+```{r}
+train80Prop <- trainData %>% 
+  select(`Adaptivity Level`) %>% 
+  group_by(`Adaptivity Level`) %>% 
+  summarize(n = n()) %>% 
+  mutate(pct = round(prop.table(n), 2))
+
+test80Prop <- testData %>% 
+  select(`Adaptivity Level`) %>% 
+  group_by(`Adaptivity Level`) %>% 
+  summarize(n = n()) %>% 
+  mutate(pct = round(prop.table(n), 2))
+
+train80Prop
+test80Prop
+```
+
+They are proportionate, next is building decision tress for each attribute selection measure:
+
+```{r}
+infoGainTree <- rpart(formula = `Adaptivity Level` ~ ., data = trainData, method = "class", parms = list(split = "information"))
+gainRatioTree <- rpart(formula = `Adaptivity Level` ~ ., data = trainData, method = "class", parms = list(split = "anova"))
+GiniIndexTree <- rpart(formula = `Adaptivity Level` ~ ., data = trainData, method = "class", parms = list(split = "gini"))
+```
+
+1.  Information Gain
+
+    ```{r}
+    IG2.ctree <- ctree(infoGainTree, data = trainData)
+    table(predict(IG2.ctree), trainData$`Adaptivity Level`)
+
+    print(IG2.ctree)
+    plot(IG2.ctree, type="simple")
+
+    testPred <- predict(IG2.ctree, newdata = testData)
+    result<-table(testPred, testData$`Adaptivity Level`)
+
+    results <- confusionMatrix(testPred, testData$`Adaptivity Level`)
+    print(results)
+    ```
+
+2.  Gain Ratio
+
+    ```{r}
+    GR2.ctree <- ctree(gainRatioTree, data = trainData)
+    table(predict(GR2.ctree), trainData$`Adaptivity Level`)
+
+    print(GR2.ctree)
+    plot(GR2.ctree, type="simple")
+
+    testPred <- predict(GR2.ctree, newdata = testData)
+    result<-table(testPred, testData$`Adaptivity Level`)
+    ```
+
+Calculating evaluation metrics
+
+```{r}
+confusion_matrix <- confusionMatrix(data = testPred, reference = testData$`Adaptivity Level`)
+# Calculate evaluation metrics
+accuracy <- confusion_matrix$overall["Accuracy"]
+accuracy
+# Calculate precision
+precision <- confusion_matrix$table[2,2] / sum(confusion_matrix$table[,2])
+precision
+as.matrix(results, what = "overall")
+```
+
+3.  Gini Index
+
+```{r}
+GI2.ctree <- ctree(GiniIndexTree, data = trainData)
+table(predict(GI2.ctree), trainData$`Adaptivity Level`)
+
+print(GI2.ctree)
+plot(GI2.ctree, type="simple")
+
+testPred <- predict(GI2.ctree, newdata = testData)
+result<-table(testPred, testData$`Adaptivity Level`)
+
+results <- confusionMatrix(testPred, testData$`Adaptivity Level`)
+print(results)
+
+```
+
+#### 3- 70/30 distribution:
+
+Splitting the data into training and testing tests
+
+```{r}
+set.seed(1234)
+split70 <- createDataPartition(dataset$`Adaptivity Level`, p = 0.7, list = FALSE, times = 1)
+trainData <- dataset[split70,]
+testData <- dataset[split70,]
+```
+
+Checking that both the training and testing sets have the same label proportions
+
+```{r}
+train70Prop <- trainData %>% 
+  select(`Adaptivity Level`) %>% 
+  group_by(`Adaptivity Level`) %>% 
+  summarize(n = n()) %>% 
+  mutate(pct = round(prop.table(n), 2))
+
+test70Prop <- testData %>% 
+  select(`Adaptivity Level`) %>% 
+  group_by(`Adaptivity Level`) %>% 
+  summarize(n = n()) %>% 
+  mutate(pct = round(prop.table(n), 2))
+
+train70Prop
+test70Prop
+```
+
+They are proportionate, next is building decision tress for each attribute selection measure:
+
+```{r}
+infoGainTree <- rpart(formula = `Adaptivity Level` ~ ., data = trainData, method = "class", parms = list(split = "information"))
+gainRatioTree <- rpart(formula = `Adaptivity Level` ~ ., data = trainData, method = "class", parms = list(split = "anova"))
+GiniIndexTree <- rpart(formula = `Adaptivity Level` ~ ., data = trainData, method = "class", parms = list(split = "gini"))
+```
+
+1.  Information Gain
+
+    ```{r}
+    IG3.ctree <- ctree(infoGainTree, data = trainData)
+    table(predict(IG3.ctree), trainData$`Adaptivity Level`)
+
+    print(IG3.ctree)
+    plot(IG3.ctree, type="simple")
+
+    testPred <- predict(IG3.ctree, newdata = testData)
+    result<-table(testPred, testData$`Adaptivity Level`)
+
+    results <- confusionMatrix(testPred, testData$`Adaptivity Level`)
+    print(results)
+    ```
+
+2.  Gain Ratio
+
+```{r}
+GR3.ctree <- ctree(gainRatioTree, data = trainData)
+table(predict(GR3.ctree), trainData$`Adaptivity Level`)
+
+print(GR3.ctree)
+plot(GR3.ctree, type="simple")
+
+testPred <- predict(GR3.ctree, newdata = testData)
+result<-table(testPred, testData$`Adaptivity Level`)
+```
+
+Calculating evaluation metrics
+
+```{r}
+confusion_matrix <- confusionMatrix(data = testPred, reference = testData$`Adaptivity Level`)
+# Calculate evaluation metrics
+accuracy <- confusion_matrix$overall["Accuracy"]
+accuracy
+# Calculate precision
+precision <- confusion_matrix$table[2,2] / sum(confusion_matrix$table[,2])
+precision
+as.matrix(results, what = "overall")
+
+```
+
+3.  Gini Index
+
+```{r}
+GI3.ctree <- ctree(GiniIndexTree, data = trainData)
+table(predict(GI3.ctree), trainData$`Adaptivity Level`)
+
+print(GI3.ctree)
+plot(GI3.ctree, type="simple")
+
+testPred <- predict(GI3.ctree, newdata = testData)
+result<-table(testPred, testData$`Adaptivity Level`)
+
+results <- confusionMatrix(testPred, testData$`Adaptivity Level`)
+print(results)
+```
+
+### Findings:
+
+#### 1- 90/10 Distribution summary:
+
+Accuracy: 77.05%
+
+Precision: 77.31%
+
+Sensitivity: 74.47%
+
+Specificity: 86.61%
+
+#### 2- 80/20 Distribution summary:
+
+Accuracy: 75.31%
+
+Precision: 60.41%
+
+Sensitivity: 71.97%
+
+Specificity: 84.69%
+
+#### 3- 70/30 Distribution summary:
+
+Accuracy: 75.71%
+
+Precision: 73.81%
+
+Sensitivity: 67.16%
+
+Specificity: 84.96%
+
+#### 4- Overall:
+
+We find from the collected and presented data that the accuracy ranges between 0.7531 and 0.7705, which is good even if we go with the lowest value, and that a 90/10 distribution showed the best accuracy, precision, sensitivity, and specificity.
+
+------------------------------------------------------------------------
+
+### Clustring:
+
+```{r}
+# load the dataset 
+df<-dataset
+
+
+#drop the class label (Adaptivity Level))
+df<-df[1:13]
+str(df)
+
+distinct_data_points <- nrow(unique(df))
+print(distinct_data_points)
+```
+
+#### Performing K-Means Clustering with K=5, K=4, K=2, K=3 (The Best)
+
+```{r}
+
+#make this example reproducible
+set.seed(1234)
+
+df_numeric <- as.data.frame(lapply(df, as.numeric))
+
+# Determine the maximum value of k you want to try
+max_k <- 5
+
+# Create an empty list to store the results
+kmeans_results <- list()
+
+# Loop through different k values
+for (k in 1:max_k) {
+  kmeans_results[[k]] <- kmeans(df_numeric, centers = k, nstart = 25)
+}
+```
+
+1.  K = 5
+
+    ```{r}
+    k5_results <- kmeans_results[[5]]
+    k5_results
+    ```
+
+    ```{r}
+    # Visualize the clustering
+    fviz_cluster(kmeans_results[[5]], data = df_numeric, geom = "point")
+
+    # Evaluate and compare the clustering results
+    silhouette_score <- silhouette(kmeans_results[[5]]$cluster, dist(df_numeric))
+    silhouette_score
+
+
+    # Calculate the total within-cluster sum of squares
+    within_cluster_sum_squares <- kmeans_results[[5]]$tot.withins
+    within_cluster_sum_squares
+
+
+
+    Bcubed_score <- BCubed_metric(dataset$`Adaptivity Level`, kmeans_results[[5]]$cluster,0.5)
+    Bcubed_score
+
+    df1<-data.frame(Actual=dataset$`Adaptivity Level`,cluster=kmeans_results[[5]]$cluster)
+    head(df1,15)
+    cont_table <- table(df1$Actual, df1$cluster)
+    cont_table
+    differences <- sum(apply(cont_table, 1, max)) - sum(diag(cont_table))
+    differences
+    heatmap(cont_table, 
+            col = heat.colors(max(cont_table)),
+            main = "Cluster Assignments vs. Actual Class Labels",
+            xlab = "Cluster Labels",
+            ylab = "Actual Class Labels")
+    ```
+
+2.  K = 4
+
+```{r}
+k4_results <- kmeans_results[[4]]
+k4_results
+```
+
+```{r}
+# Visualize the clustering
+fviz_cluster(kmeans_results[[4]], data = df_numeric, geom = "point")
+
+# Evaluate and compare the clustering results
+silhouette_score <- silhouette(kmeans_results[[4]]$cluster, dist(df_numeric))
+silhouette_score
+
+
+# Calculate the total within-cluster sum of squares
+within_cluster_sum_squares <- kmeans_results[[4]]$tot.withins
+within_cluster_sum_squares
+
+
+
+Bcubed_score <- BCubed_metric(dataset$`Adaptivity Level`, kmeans_results[[4]]$cluster,0.5)
+Bcubed_score
+
+df1<-data.frame(Actual=dataset$`Adaptivity Level`,cluster=kmeans_results[[4]]$cluster)
+head(df1,15)
+cont_table <- table(df1$Actual, df1$cluster)
+cont_table
+differences <- sum(apply(cont_table, 1, max)) - sum(diag(cont_table))
+differences
+heatmap(cont_table, 
+        col = heat.colors(max(cont_table)),
+        main = "Cluster Assignments vs. Actual Class Labels",
+        xlab = "Cluster Labels",
+        ylab = "Actual Class Labels")
+```
+
+3.  K = 2
+
+    ```{r}
+    k2_results <- kmeans_results[[2]]
+    k2_results
+    ```
+
+```{r}
+# Visualize the clustering
+fviz_cluster(kmeans_results[[2]], data = df_numeric, geom = "point")
+
+# Evaluate and compare the clustering results
+silhouette_score <- silhouette(kmeans_results[[2]]$cluster, dist(df_numeric))
+silhouette_score
+
+
+# Calculate the total within-cluster sum of squares
+within_cluster_sum_squares <- kmeans_results[[2]]$tot.withins
+within_cluster_sum_squares
+
+
+
+Bcubed_score <- BCubed_metric(dataset$`Adaptivity Level`, kmeans_results[[2]]$cluster,0.5)
+Bcubed_score
+
+df1<-data.frame(Actual=dataset$`Adaptivity Level`,cluster=kmeans_results[[2]]$cluster)
+head(df1,15)
+cont_table <- table(df1$Actual, df1$cluster)
+cont_table
+differences <- sum(apply(cont_table, 1, max)) - sum(diag(cont_table))
+differences
+heatmap(cont_table, 
+        col = heat.colors(max(cont_table)),
+        main = "Cluster Assignments vs. Actual Class Labels",
+        xlab = "Cluster Labels",
+        ylab = "Actual Class Labels")
+```
+
+3.  K = 3
+
+    ```{r}
+    k3_results <- kmeans_results[[3]]
+    k3_results
+    ```
+
+    ```{r}
+    # Visualize the clustering
+    fviz_cluster(kmeans_results[[3]], data = df_numeric, geom = "point")
+
+    # Evaluate and compare the clustering results
+    silhouette_score <- silhouette(kmeans_results[[3]]$cluster, dist(df_numeric))
+    silhouette_score
+
+
+    # Calculate the total within-cluster sum of squares
+    within_cluster_sum_squares <- kmeans_results[[3]]$tot.withins
+    within_cluster_sum_squares
+
+
+
+    Bcubed_score <- BCubed_metric(dataset$`Adaptivity Level`, kmeans_results[[3]]$cluster,0.5)
+    Bcubed_score
+
+    df1<-data.frame(Actual=dataset$`Adaptivity Level`,cluster=kmeans_results[[3]]$cluster)
+    head(df1,15)
+    cont_table <- table(df1$Actual, df1$cluster)
+    cont_table
+    differences <- sum(apply(cont_table, 1, max)) - sum(diag(cont_table))
+    differences
+    heatmap(cont_table, 
+            col = heat.colors(max(cont_table)),
+            main = "Cluster Assignments vs. Actual Class Labels",
+            xlab = "Cluster Labels",
+            ylab = "Actual Class Labels")
+    ```
