@@ -358,7 +358,7 @@ cat("Precision:", precision, "\n")
 
 Model Analysis:
 
-The 90/10 split with Gain Ratio showed very good results across the evaluation metrics, with accuracy at 91.83%, precision which is the positive predictive value 92.36%, sensitivity which is the true positive rate at 92.42%, and specificity which is the true negative rate at 95.96%, those are very good numbers and indicate a great model, the root starts at the Class Duration attribute, followed by the Age and Financial Condition.
+The 90/10 split with Gain Ratio showed very good results across the evaluation metrics, with accuracy at 91.83%, precision which is the positive predictive value 92.36%, sensitivity which is the true positive rate at 92.42%, and specificity which is the true negative rate at 95.96%, those are very good numbers and indicate a great model, the root starts at the Class Duration attribute.
 
 3.  Gini Index
 
@@ -464,7 +464,7 @@ GiniIndexTree <- rpart(formula = Adaptivity.Level ~ ., data = trainData, method 
 
 Model Analysis:
 
-The 80/20 split with Gain Ratio showed the best results across all evaluation metrics except precision, but it was still very high, with accuracy at 92.06%, precision which is the positive predictive value 91.93%, sensitivity which is the true positive rate at 92.58%, and specificity which is the true negative rate at 96.06%, those are very great numbers and indicate a great model, it is the best model we have built, and the root starts at the Class Duration attribute, followed by the Financial Condition, and then the Age.
+The 80/20 split with Gain Ratio showed the best results across all evaluation metrics except precision, but it was still very high, with accuracy at 92.06%, precision which is the positive predictive value 91.93%, sensitivity which is the true positive rate at 92.58%, and specificity which is the true negative rate at 96.06%, those are very great numbers and indicate a great model, it is the best model we have built, and the root starts at the Class Duration attribute.
 
 3.  Gini Index
 
@@ -570,7 +570,7 @@ cat("\nPrecision:", precision)
 
 Model Analysis:
 
-The 70/30 split with Gain Ratio showed good results across the evaluation metrics, with accuracy at 90.84%, precision which is the positive predictive value 92.56%, sensitivity which is the true positive rate at 91.47%, and specificity which is the true negative rate at 95.47%, those are very good numbers and indicate a very good model. The root starts at the Class Duration attribute, followed by the Age and Financial Condition.
+The 70/30 split with Gain Ratio showed good results across the evaluation metrics, with accuracy at 90.84%, precision which is the positive predictive value 92.56%, sensitivity which is the true positive rate at 91.47%, and specificity which is the true negative rate at 95.47%, those are very good numbers and indicate a very good model. The root starts at the Class Duration attribute.
 
 3.  Gini Index
 
