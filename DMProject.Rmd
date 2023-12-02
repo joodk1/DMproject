@@ -58,7 +58,7 @@ The class label is "Adaptivity Level".
 options(repos = c(CRAN = "https://cran.rstudio.com"))
 ```
 
-#### Installing the packages
+### 4.1 Installing the packages:
 
 ```{r}
 install.packages("dplyr")
@@ -76,7 +76,7 @@ install.packages("NbClust")
 install.packages("C50")
 ```
 
-#### Reading libraries and the dataset
+### 4.2 Reading libraries and the dataset:
 
 ```{r}
 library(rpart)
@@ -105,7 +105,7 @@ library("C50")
 dataset <- read_csv("Dataset/students_adaptability_level_online_education.csv")
 ```
 
-#### Sample and summary of raw dataset
+### 4.3 Sample and summary of raw dataset:
 
 ```{r}
 View(dataset)
@@ -113,27 +113,27 @@ View(dataset)
 shape<-dim(dataset)
 row<-shape[1]
 col<-shape[2]
-print(paste("Number of rows are:", row))
-print(paste("Number of columns are:", col))
+cat("Number of instances:", row, "\n")
+cat("Number of attributes:", col, "\n")
 
 summary(dataset)
 names(dataset)
 str(dataset)
 ```
 
-#### Missing values
+### 4.4 Checking for missing values:
 
 ```{r}
 sum(is.na(dataset))
 ```
 
-Since there are no numerical data to be checked for outliers, and all attribute types are char, we can't calculate variance or do discretization.
+Since there are no missing values, and no numerical data to be checked for outliers, and all attributes are of type char, we can't calculate variance or do discretization.
 
 ------------------------------------------------------------------------
 
-### Plotting Methods:
+### 4.5 Plotting Methods:
 
-#### Bar plot of the gender, age, and education level attributes
+#### 4.5.1 Bar plot of the gender, age, and education level attributes:
 
 ```{r}
 # Bar plot of the gender attribute
@@ -159,7 +159,7 @@ Education level plot: this graph shows us that the dataset is mostly collected f
 
 ------------------------------------------------------------------------
 
-#### Mosaic plot of the educational level attribute with the financial condition
+#### 4.5.2 Mosaic plot of the educational level attribute with the financial condition:
 
 ```{r}
 #Mosaic plot of the educational level attribute with the financial condition
@@ -172,7 +172,7 @@ Graph description: this graph shows us a visual comparison between students' fin
 
 ------------------------------------------------------------------------
 
-#### Pie chart for the self-LMS, IT student, and the adaptivity level attributes
+#### 4.5.3 Pie chart for the self-LMS, IT student, and the adaptivity level attributes:
 
 ```{r}
 # Pie chart for the self-LMS attribute
@@ -209,7 +209,7 @@ Since this dataset only contains categorical data, discreization and normalizati
 
 ------------------------------------------------------------------------
 
-#### Encoding categorical variables
+### 4.6 Encoding categorical variables:
 
 ```{r}
 # Encoding categorical attributes
@@ -223,7 +223,7 @@ dataset[categorical_cols] <- lapply(dataset[categorical_cols], as.factor)
 
 ------------------------------------------------------------------------
 
-#### Chi Square
+### 4.7 Chi Square:
 
 ```{r}
 chisq.test(dataset$`Institution Type`, dataset$`Financial Condition`)
@@ -231,7 +231,9 @@ chisq.test(dataset$`Institution Type`, dataset$`Financial Condition`)
 
 since the p value is less than 0.05, therefore, the institution type depends on the financial condition.
 
-### Balancing the dataset:
+------------------------------------------------------------------------
+
+### 4.8 Balancing the dataset:
 
 Since we can clearly see that the dataset is imbalanced from the piechart provided above, we must take action and balance the dataset, we therefore chose to over-sample the dataset by increasing instances were the class label result is "High", we will x4 its rows to achieve this.
 
@@ -251,15 +253,19 @@ tab <- balancedDataset$Adaptivity.Level %>% table()
 percentages <- tab %>% prop.table() %>% round(3) * 100
 txt <- paste0(names(tab), '\n', percentages, '%')
 pie(tab, labels = txt, main = "Distribution of Adaptivity Levels")
+
+shape<-dim(balancedDataset)
+row<-shape[1]
+cat("Number of instances:", row)
 ```
 
-As we can see, the dataset looks so much better now and is nearly perfectly balanced
+As we can see, the dataset looks so much better now and is nearly perfectly balanced, after adding 4 times the original amount of rows with "High" adaptivity level, with the total of 1605 instances instead of the previous 1205.
 
 ------------------------------------------------------------------------
 
 ## 5. Data Mining Techniques:
 
-### Classification:
+### 5.1 Classification:
 
 In this section, we will be building decision trees, which are a recursive method that generate a tree with leaf nodes pointing to the final decision. Our model will predict the adaptivity level classification ("High", "Moderate", "Low"). The rest of the attributes are used to make the prediction. To be consistent we used the same formula for all methods except Gain ratio; since the decision tree will be complex, so we be content with Job Status, Job Rate , Department and Permissions which are the most 4 important attributes as mentioned in the feature selection.
 
@@ -269,13 +275,13 @@ The choice of dividing the dataset into three different distributions (90/10, 80
 
 We will also be using 3 different evaluation metrics, Information Gain, Gain Ratio, and Gini Index.
 
-Information Gain is a measure that quantifies the reduction in uncertainty about the target variable achieved by splitting the data based on a particular feature. The goal of a decision tree is to select the feature that provides the highest information gain, as it leads to more effective classification. Information gain is calculated by comparing the entropy (or impurity) of the dataset before and after the split.
+Information Gain is a measure that quantifies the reduction in uncertainty about the target variable achieved by splitting the data based on a particular feature. The goal of a decision tree is to select the feature that provides the highest information gain, as it leads to more effective classification. Information gain is calculated by comparing the entropy (or impurity) of the dataset before and after the split. We will be using rpart to achieve this.
 
-Gain Ratio is an extension of Information Gain that takes into account the intrinsic information of a feature, preventing bias towards features with many values. Gain Ratio is computed by dividing the Information Gain by the split information, which measures the potential information provided by a feature.
+Gain Ratio is an extension of Information Gain that takes into account the intrinsic information of a feature, preventing bias towards features with many values. Gain Ratio is computed by dividing the Information Gain by the split information, which measures the potential information provided by a feature. We will be using C5.0 to achieve this.
 
-Gini Index is another impurity measure used in decision trees. It quantifies the probability of incorrectly classifying a randomly chosen element in the dataset. The Gini Index is minimized when a node is pure, meaning all instances belong to a single class. Decision trees aim to select splits that minimize the Gini Index, leading to nodes that are as homogenous as possible.
+Gini Index is another impurity measure used in decision trees. It quantifies the probability of incorrectly classifying a randomly chosen element in the dataset. The Gini Index is minimized when a node is pure, meaning all instances belong to a single class. Decision trees aim to select splits that minimize the Gini Index, leading to nodes that are as homogenous as possible. We will be using rpart to achieve this.
 
-#### 1- 90/10 distribution:
+#### 5.1.1 90/10 distribution:
 
 Splitting the data into training and testing tests
 
@@ -317,6 +323,8 @@ precision <- confusion_matrix$table[2,2] / sum(confusion_matrix$table[,2])
 cat("Precision:", precision)
 ```
 
+Model Analysis:
+
 This tree shows that the most influential attribute for identifying the Adaptivity Level is the Financial Condition, it suggests that the first split is based on the financial condition being either "Mid" or "Poor." The subsequent splits are Class Duration being either "1-3" and "3-6", and then Age.
 
 The 90/10 split with Information Gain showed good results across the evaluation metrics, with accuracy at 80.69%, precision which is the positive predictive value 75.23%, sensitivity which is the true positive rate at 81.36%, and specificity which is the true negative rate at 90.28%, those are very good numbers and indicate a good model.
@@ -339,6 +347,7 @@ testResults <- confusionMatrix(testPred, testData$Adaptivity.Level)
 
 # Plot the decision tree
 plot(gainRatioTree)
+summary(gainRatioTree)
 
 confusion_matrix <- confusionMatrix(data = testPred, reference = testData$Adaptivity.Level)
 
@@ -347,7 +356,9 @@ precision <- confusion_matrix$table[2,2] / sum(confusion_matrix$table[,2])
 cat("Precision:", precision, "\n")
 ```
 
-The 90/10 split with Gain Ratio showed very good results across the evaluation metrics, with accuracy at 91.83%, precision which is the positive predictive value 92.36%, sensitivity which is the true positive rate at 92.42%, and specificity which is the true negative rate at 95.96%, those are very good numbers and indicate a great model.
+Model Analysis:
+
+The 90/10 split with Gain Ratio showed very good results across the evaluation metrics, with accuracy at 91.83%, precision which is the positive predictive value 92.36%, sensitivity which is the true positive rate at 92.42%, and specificity which is the true negative rate at 95.96%, those are very good numbers and indicate a great model, the root starts at the Class Duration attribute, followed by the Age and Financial Condition.
 
 3.  Gini Index
 
@@ -371,11 +382,13 @@ precision <- confusion_matrix$table[2,2] / sum(confusion_matrix$table[,2])
 cat("Precision:", precision, "\n")
 ```
 
+Model Analysis:
+
 This tree shows the exact same results as the Information Gain tree, it shows that the most influential attribute for identifying the Adaptivity Level is the Financial Condition, it suggests that the first split is based on the financial condition being either "Mid" or "Poor." The subsequent splits are Class Duration being either "1-3" and "3-6", and then Age.
 
 The 90/10 split with Gini Index, like the one with Information Gain showed good results across the evaluation metrics, with accuracy at 80.69%, precision which is the positive predictive value 75.23%, sensitivity which is the true positive rate at 81.36%, and specificity which is the true negative rate at 90.28%, those are very good numbers and indicate a good model.
 
-#### 2- 80/20 distribution:
+#### 5.1.2 80/20 distribution:
 
 Splitting the data into training and testing tests
 
@@ -416,6 +429,8 @@ GiniIndexTree <- rpart(formula = Adaptivity.Level ~ ., data = trainData, method 
     cat("Precision:", precision)
     ```
 
+    Model Analysis:
+
     This tree shows that the most influential attribute for identifying the Adaptivity Level is the Financial Condition, it suggests that the first split is based on the financial condition being either "Mid" or "Poor." The subsequent splits are Class Duration being either "1-3" and "3-6", and then Age. Those results are similar to the 90/10 distribution with IG/GI results.
 
     The 80/20 split with Information Gain showed lower results than the other trees in all evaluation metrics but precision, with accuracy at 77.88%, precision which is the positive predictive value 78.39%, sensitivity which is the true positive rate at 78.16%, and specificity which is the true negative rate at 88.80%, those are good numbers and indicate that the model is not a bad model.
@@ -438,6 +453,7 @@ GiniIndexTree <- rpart(formula = Adaptivity.Level ~ ., data = trainData, method 
 
     # Plot the decision tree
     plot(gainRatioTree)
+    summary(gainRatioTree)
 
     confusion_matrix <- confusionMatrix(data = testPred, reference = testData$Adaptivity.Level)
 
@@ -446,7 +462,9 @@ GiniIndexTree <- rpart(formula = Adaptivity.Level ~ ., data = trainData, method 
     cat("\nPrecision:", precision)
     ```
 
-The 80/20 split with Gain Ratio showed the best results across all evaluation metrics except precision, but it was still very high, with accuracy at 92.06%, precision which is the positive predictive value 91.93%, sensitivity which is the true positive rate at 92.58%, and specificity which is the true negative rate at 96.06%, those are very great numbers and indicate a great model, it is the best model we have built.
+Model Analysis:
+
+The 80/20 split with Gain Ratio showed the best results across all evaluation metrics except precision, but it was still very high, with accuracy at 92.06%, precision which is the positive predictive value 91.93%, sensitivity which is the true positive rate at 92.58%, and specificity which is the true negative rate at 96.06%, those are very great numbers and indicate a great model, it is the best model we have built, and the root starts at the Class Duration attribute, followed by the Financial Condition, and then the Age.
 
 3.  Gini Index
 
@@ -470,11 +488,13 @@ precision <- confusion_matrix$table[2,2] / sum(confusion_matrix$table[,2])
 cat("Precision:", precision, "\n")
 ```
 
+Model Analysis:
+
 This tree shows the exact same results as the Information Gain tree, it shows that the most influential attribute for identifying the Adaptivity Level is the Financial Condition, it suggests that the first split is based on the financial condition being either "Mid" or "Poor." The subsequent splits are Class Duration being either "1-3" and "3-6", and then Age.
 
 The 80/20 split with Gini Index, like the one with Information Gain showed lower results than the other trees in all evaluation metrics but precision, with accuracy at 77.88%, precision which is the positive predictive value 78.39%, sensitivity which is the true positive rate at 78.16%, and specificity which is the true negative rate at 88.80%, those are good numbers and indicate that the model is not a model.
 
-#### 3- 70/30 distribution:
+#### 5.1.3 70/30 distribution:
 
 Splitting the data into training and testing tests
 
@@ -515,7 +535,9 @@ GiniIndexTree <- rpart(formula = Adaptivity.Level ~ ., data = trainData, method 
     cat("\nPrecision:", precision)
     ```
 
-    1)  This tree shows that the most influential attribute for identifying the Adaptivity Level is once again the Financial Condition, it suggests that the first split is based on the financial condition being either "Mid" or "Poor." The subsequent splits are Class Duration being either "1-3" and "3-6", and then Age. Those results are similar to the 90/10 and 80/20 distributions with IG/GI results.
+    1)  Model Analysis:
+
+        This tree shows that the most influential attribute for identifying the Adaptivity Level is once again the Financial Condition, it suggests that the first split is based on the financial condition being either "Mid" or "Poor." The subsequent splits are Class Duration being either "1-3" and "3-6", and then Age. Those results are similar to the 90/10 and 80/20 distributions with IG/GI results.
 
         The 70/30 split with Information Gain showed average results compared to other trees in all evaluation metrics but precision, with accuracy at 78.83%, precision which is the positive predictive value 77.38%, sensitivity which is the true positive rate at 80%, and specificity which is the true negative rate at 89.51%, those are good numbers and indicate that the model is good.
 
@@ -537,6 +559,7 @@ testResults <- confusionMatrix(testPred, testData$Adaptivity.Level)
 
 # Plot and Print the decision tree
 plot(gainRatioTree)
+summary(gainRatioTree)
 
 confusion_matrix <- confusionMatrix(data = testPred, reference = testData$Adaptivity.Level)
 
@@ -545,7 +568,9 @@ precision <- confusion_matrix$table[2,2] / sum(confusion_matrix$table[,2])
 cat("\nPrecision:", precision)
 ```
 
-The 70/30 split with Gain Ratio showed good results across the evaluation metrics, with accuracy at 90.84%, precision which is the positive predictive value 92.56%, sensitivity which is the true positive rate at 91.47%, and specificity which is the true negative rate at 95.47%, those are very good numbers and indicate a very good model.
+Model Analysis:
+
+The 70/30 split with Gain Ratio showed good results across the evaluation metrics, with accuracy at 90.84%, precision which is the positive predictive value 92.56%, sensitivity which is the true positive rate at 91.47%, and specificity which is the true negative rate at 95.47%, those are very good numbers and indicate a very good model. The root starts at the Class Duration attribute, followed by the Age and Financial Condition.
 
 3.  Gini Index
 
@@ -569,13 +594,23 @@ precision <- confusion_matrix$table[2,2] / sum(confusion_matrix$table[,2])
 cat("\nPrecision:", precision)
 ```
 
+Model Analysis:
+
 This tree shows the exact same results as the Information Gain tree, it shows that the most influential attribute for identifying the Adaptivity Level is the Financial Condition, it suggests that the first split is based on the financial condition being either "Mid" or "Poor." The subsequent splits are Class Duration being either "1-3" and "3-6", and then Age. Those results are similar to the 90/10 and 80/20 distributions with IG/GI results.
 
 The 70/30 split with Gini Index, like the one with Information Gain showed average results compared to other trees in all evaluation metrics but precision, with accuracy at 78.83%, precision which is the positive predictive value 77.38%, sensitivity which is the true positive rate at 80%, and specificity which is the true negative rate at 89.51%, those are good numbers and indicate that the model is good.
 
 ------------------------------------------------------------------------
 
-### Clustering:
+### 5.2 Clustering:
+
+Clustering is a machine learning technique that involves grouping similar data points together based on inherent patterns and similarities. In this project, we leverage clustering to unveil hidden structures within our dataset, identifying natural groupings of students' attributes that can assist in understanding the intrinsic relationships between them. By employing clustering, we aim to reveal patterns that may not be immediately apparent in identifying students' adaptability level in online education.
+
+We will start by removing our class label, then trying different methods to finding the optimal number of clusters, pick 3 numbers of K, which represent the number of clusters, and then finally validate our clusters based on their results on different metrics, namely the **Average Silhouette Width**, which measures how similar an object is to its own cluster compared to other clusters, the **Total Within-Cluster Sum of Square**, which quantifies the compactness of clusters, **BCubed Precision** and **BCubed Recall**, which are used to evaluate clustering performance, BCubed Precision measures the proportion of correctly clustered instances within a cluster, while BCubed Recall measures the proportion of correctly clustered instances for a given true class.
+
+The results and findings will be presented afterwards in the Findings section.
+
+#### 5.2.1 Removing the class label:
 
 ```{r}
 # load the dataset 
@@ -589,7 +624,9 @@ distinct_data_points <- nrow(unique(df))
 print(distinct_data_points)
 ```
 
-#### Cluster Validation Using the Silhouette Method:
+#### 5.2.2 Finding the optimal number of clusters:
+
+1- Using the Silhouette Method:
 
 ```{r}
 # Convert dataframe columns to numeric
@@ -599,9 +636,9 @@ df <- scale(df_numeric)
 fviz_nbclust(df, kmeans, method = "silhouette") + labs(subtitle = "Silhouette method")
 ```
 
-K=2 seems to be the optimal number of clusters using the silhouette method.
+Graph description: K=2 seems to be the optimal number of clusters using the silhouette method.
 
-#### Cluster Validation Using the Elbow Method:
+2- Using the Elbow Method:
 
 ```{r}
 wssplot<- function (df, nc=15, seed=1234)
@@ -616,11 +653,11 @@ df1 = na.omit(df)
 wssplot(df1)
 ```
 
-Using the elbow method, K=2 also seems to be the optimal number of clusters.
+Graph description: Using the elbow method, K=2 also seems to be the optimal number of clusters.
 
-As you can see, we employed two methods, the Silhouette method and the Elbow method, to assist in determining the optimal number of clusters for our dataset. Interestingly, both the Silhouette method and the Elbow method pointed towards 2 clusters as a potentially optimal choice. The Silhouette method, which measures how well-defined and separated the clusters are, suggested 2 as the most suitable number, while the Elbow method, examining the within-cluster sum of squares, repeated this recommendation. However, to ensure a comprehensive exploration, we also considered k values of 3 and 4. The inclusion of these additional cluster counts allows us to assess whether the clustering structure remains stable across different configurations.
+As you can see, we employed two methods, the Silhouette method and the Elbow method, to assist in determining the optimal number of clusters for our dataset. Interestingly, both the Silhouette method and the Elbow method pointed towards 2 clusters as a potentially optimal choice. The Silhouette method, which measures how well-defined and separated the clusters are, suggested 2 as the most suitable number, while the Elbow method, examining the within-cluster sum of squares, repeated this recommendation. However, to ensure a comprehensive exploration, we also considered k values of 5 and 4 as they also seem good according to the elbow method. The inclusion of these additional cluster counts allows us to assess whether the clustering structure remains stable across different configurations.
 
-#### Performing K-Means Clustering with K=4, K=3, K=2:
+#### 5.2.3 Performing K-Means Clustering with K=5, K=4, K=2:
 
 ```{r}
 
@@ -628,7 +665,7 @@ As you can see, we employed two methods, the Silhouette method and the Elbow met
 set.seed(1234)
 
 # Determine the maximum value of k you want to try
-max_k <- 4
+max_k <- 5
 
 # Create an empty list to store the results
 kmeans_results <- list()
@@ -641,24 +678,24 @@ for (k in 1:max_k) {
 
 ```
 
-1.  K = 4
+1.  K = 5
 
 ```{r}
-k4_results <- kmeans_results[[4]]
-k4_results
+k5_results <- kmeans_results[[5]]
+k5_results
 
 # Visualize the clustering
-fviz_cluster(k4_results, data = df_numeric, geom = "point")
+fviz_cluster(k5_results, data = df_numeric, geom = "point")
 
 # Calculate the silhouette width
-silhouette_score <- silhouette(k4_results$cluster, dist(df_numeric))
+silhouette_score <- silhouette(k5_results$cluster, dist(df_numeric))
 # Extract the average silhouette width
 average_silhouette <- mean(silhouette_score[, 3])
 
-within_cluster_sum_squares <- k4_results$tot.withinss
+within_cluster_sum_squares <- k5_results$tot.withinss
 
 # BCubed function
-clusters <- k4_results$cluster
+clusters <- k5_results$cluster
 ground_truth <- c(balancedDataset$Adaptivity.Level)
 
 BCubed_Precision <- function(clusters, ground_truth) {
@@ -696,24 +733,24 @@ cat("BCubed precision:", precision, "\n")
 cat("BCubed recall:", recall, "\n")
 ```
 
-2.  K = 3
+2.  K = 4
 
 ```{r}
-k3_results <- kmeans_results[[3]]
-k3_results
+k4_results <- kmeans_results[[4]]
+k4_results
 
 # Visualize the clustering
-fviz_cluster(k3_results, data = df_numeric, geom = "point")
+fviz_cluster(k4_results, data = df_numeric, geom = "point")
 
 # Calculate the silhouette width
-silhouette_score <- silhouette(k3_results$cluster, dist(df_numeric))
+silhouette_score <- silhouette(k4_results$cluster, dist(df_numeric))
 # Extract the average silhouette width
 average_silhouette <- mean(silhouette_score[, 3])
 
-within_cluster_sum_squares <- k3_results$tot.withinss
+within_cluster_sum_squares <- k4_results$tot.withinss
 
 # BCubed function
-clusters <- k3_results$cluster
+clusters <- k4_results$cluster
 ground_truth <- c(balancedDataset$Adaptivity.Level)
 
 BCubed_Precision <- function(clusters, ground_truth) {
@@ -810,7 +847,7 @@ cat("BCubed recall:", recall, "\n")
 
 ### 6. Evaluation and Comparison:
 
-#### Classification:
+#### 6.1 Classification:
 
 |     Distribution      |              90/10               |   90/10    |              80/20               |   80/20    |              70/30               |   70/30    |
 |:--------:|:-----------:|:-----:|:-----------:|:-----:|:-------------:|:------:|
@@ -820,12 +857,12 @@ cat("BCubed recall:", recall, "\n")
 |    **Sensitivity**    |              81.36%              |   92.42%   |              78.16%              |   92.58%   |              80.00%              |   91.47%   |
 |    **Specificity**    |              90.28%              |   95.96%   |              88.80%              |   96.06%   |              89.51%              |   95.47%   |
 
-#### Clustering:
+#### 6.2 Clustering:
 
-|                                    |    K=2    |    K=3    |    K=4    |
+|                                    |    K=2    |    K=4    |    K=5    |
 |:----------------------------------:|:---------:|:---------:|:---------:|
-|       Avg. Silhouette Width        | 0.3145231 | 0.2869528 | 0.253453  |
-| Total Within-Cluster Sum of Square | 5062.039  | 4446.174  |  3933.21  |
+|       Avg. Silhouette Width        | 0.3145231 | 0.253453  | 0.255273  |
+| Total Within-Cluster Sum of Square | 5062.039  |  3933.21  | 3549.907  |
 |          BCubed Precision          | 0.3607182 | 0.3787132 | 0.3906725 |
 |           BCubed Recall            | 0.5356556 | 0.4328303 | 0.3172995 |
 
@@ -833,7 +870,7 @@ cat("BCubed recall:", recall, "\n")
 
 ### 7. Findings:
 
-#### Classification:
+#### 7.1 Classification:
 
 After some trials and research, we found that using Information Gain and Gini Index gave the exact same results in all distributions, this could be due to our dataset being relatively small and containing only categorical data.
 
@@ -851,11 +888,11 @@ And overall, an **80/20 distribution with a Gain Ratio evaluation metric showed 
 
 This could be attributed to a balanced representation of the data for model training and testing. In a classification task, having a diverse and representative set of examples for both training and testing is crucial for the model to generalize well to unseen data. The 80/20 distribution strikes a balance between having enough data for the model to learn patterns effectively (80% for training) while also having a substantial portion reserved for assessing the model's performance on new, unseen instances (20% for testing). Additionally, the Gain Ratio evaluation metric takes into account the intrinsic characteristics of the dataset, this might be better suited for the nature of our categorical dataset, contributing to the improved performance. It is essential to fine-tune the distribution and evaluation metric based on the dataset's unique properties to achieve optimal classification results.
 
-#### Clustering:
+#### 7.2 Clustering:
 
-From the results, we found that our dataset is unsuitable for clustering since the clusters overlap in all the plots we made, but despite that 2 clusters did show better results as the silhouette and elbow methods suggested. We believe this is due to the inherent nature of categorical data. An article on Safe Hub Collective stated that "k-Means algorithm is not applicable to categorical data, as categorical variables are discrete and do not have any natural origin. So computing euclidean distance for such as space is not meaningful."[1]
+From the results, we found that our dataset is unsuitable for clustering since the clusters overlap in all the plots we made, and the results we got in all evaluation metrics were not good, but despite that 2 clusters did show better results as the silhouette and elbow methods suggested in all metrics except BCubed Precision. We believe this is due to the inherent nature of categorical data. An article on Safe Hub Collective stated that "k-Means algorithm is not applicable to categorical data, as categorical variables are discrete and do not have any natural origin. So computing euclidean distance for such as space is not meaningful."[1]
 
-#### Classification VS Clustering:
+#### 7.3 Classification VS Clustering:
 
 In conclusion, classification appears to be a more suitable approach than clustering for our dataset and problem. The nature of our dataset which contains only categorical attributes, aligns well with the goals of a classification task. Through classification, we aimed to analyze and understand the attributes influencing the rate of adaptivity level. The results demonstrated consistent and promising performance across various evaluation metrics, indicating that the classification models were effective in predicting and categorizing adaptivity levels.
 
